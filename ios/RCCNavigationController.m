@@ -48,9 +48,13 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
 }
 
 
-- (void)performAction:(NSString*)performAction actionParams:(NSDictionary*)actionParams bridge:(RCTBridge *)bridge
+- (void)performAction:(NSString*)performAction actionParams:(NSDictionary*)actionParams bridge:(RCTBridge *)bridge resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
   BOOL animated = actionParams[@"animated"] ? [actionParams[@"animated"] boolValue] : YES;
+  
+  dispatch_block_t completionBlock = ^{
+    resolve(nil);
+  };
   
   // push
   if ([performAction isEqualToString:@"push"])
@@ -124,14 +128,21 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
       [self setButtons:rightButtons viewController:viewController side:@"right" animated:NO];
     }
     
+    [CATransaction begin];
+    [CATransaction setCompletionBlock:completionBlock];
     [self pushViewController:viewController animated:animated];
+    [CATransaction commit];
+    
     return;
   }
   
   // pop
   if ([performAction isEqualToString:@"pop"])
   {
+    [CATransaction begin];
+    [CATransaction setCompletionBlock:completionBlock];
     [self popViewControllerAnimated:animated];
+    [CATransaction commit];
     return;
   }
   

@@ -132,7 +132,7 @@ const NSInteger kLightBoxTag = 0x101010;
     return [UIBlurEffect effectWithStyle:blurEffectStyle];
 }
 
--(void)showAnimated
+-(void)showAnimated:(RCTPromiseResolveBlock)resolve
 {
     if (self.visualEffectView != nil || self.overlayColorView != nil)
     {
@@ -156,10 +156,13 @@ const NSInteger kLightBoxTag = 0x101010;
     {
         self.reactView.transform = CGAffineTransformIdentity;
         self.reactView.alpha = 1;
-    } completion:nil];
+    } completion:^(BOOL finished)
+     {
+         resolve(nil);
+     }];
 }
 
--(void)dismissAnimated
+-(void)dismissAnimated:(RCTPromiseResolveBlock)resolve
 {
     BOOL hasOverlayViews = (self.visualEffectView != nil || self.overlayColorView != nil);
     
@@ -173,6 +176,7 @@ const NSInteger kLightBoxTag = 0x101010;
         if (!hasOverlayViews)
         {
             [self removeFromSuperview];
+            resolve(nil);
         }
     }];
     
@@ -193,6 +197,7 @@ const NSInteger kLightBoxTag = 0x101010;
          } completion:^(BOOL finished)
          {
              [self removeFromSuperview];
+             resolve(nil);
          }];
     }
 }
@@ -208,7 +213,7 @@ const NSInteger kLightBoxTag = 0x101010;
     return window;
 }
 
-+(void)showWithParams:(NSDictionary*)params
++(void)showWithParams:(NSDictionary*)params resolver:(RCTPromiseResolveBlock)resolve
 {
     UIWindow *window = [RCCLightBox getWindow];
     if ([window viewWithTag:kLightBoxTag] != nil)
@@ -219,16 +224,16 @@ const NSInteger kLightBoxTag = 0x101010;
     RCCLightBoxView *lightBox = [[RCCLightBoxView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) params:params];
     lightBox.tag = kLightBoxTag;
     [window addSubview:lightBox];
-    [lightBox showAnimated];
+    [lightBox showAnimated:resolve];
 }
 
-+(void)dismiss
++(void)dismiss:(RCTPromiseResolveBlock)resolve
 {
     UIWindow *window = [RCCLightBox getWindow];
     RCCLightBoxView *lightBox = [window viewWithTag:kLightBoxTag];
     if (lightBox != nil)
     {
-        [lightBox dismissAnimated];
+        [lightBox dismissAnimated:resolve];
     }
 }
 

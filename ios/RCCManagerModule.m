@@ -264,12 +264,12 @@ RCT_EXPORT_METHOD(
 }
 
 RCT_EXPORT_METHOD(
-                  NavigationControllerIOS:(NSString*)controllerId performAction:(NSString*)performAction actionParams:(NSDictionary*)actionParams)
+                  NavigationControllerIOS:(NSString*)controllerId performAction:(NSString*)performAction actionParams:(NSDictionary*)actionParams resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     if (!controllerId || !performAction) return;
     RCCNavigationController* controller = [[RCCManager sharedInstance] getControllerWithId:controllerId componentType:@"NavigationControllerIOS"];
     if (!controller || ![controller isKindOfClass:[RCCNavigationController class]]) return;
-    return [controller performAction:performAction actionParams:actionParams bridge:[[RCCManager sharedInstance] getBridge]];
+    return [controller performAction:performAction actionParams:actionParams bridge:[[RCCManager sharedInstance] getBridge] resolver:resolve rejecter:reject];
 }
 
 RCT_EXPORT_METHOD(
@@ -304,15 +304,15 @@ RCT_EXPORT_METHOD(
 }
 
 RCT_EXPORT_METHOD(
-                  modalShowLightBox:(NSDictionary*)params)
+                  modalShowLightBox:(NSDictionary*)params resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [RCCLightBox showWithParams:params];
+    [RCCLightBox showWithParams:params resolver:resolve];
 }
 
 RCT_EXPORT_METHOD(
-                  modalDismissLightBox)
+                  modalDismissLightBox:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [RCCLightBox dismiss];
+    [RCCLightBox dismiss:resolve];
 }
 
 RCT_EXPORT_METHOD(
@@ -337,9 +337,13 @@ RCT_EXPORT_METHOD(
         }
     }
     
+    dispatch_block_t completionBlock = ^{
+        resolve(nil);
+    };
+    
     [[RCCManagerModule lastModalPresenterViewController] presentViewController:controller
                                                                       animated:![animationType isEqualToString:@"none"]
-                                                                    completion:^(){ resolve(nil); }];
+                                                                    completion:completionBlock];
 }
 
 -(BOOL)viewControllerIsModal:(UIViewController*)viewController
@@ -358,8 +362,12 @@ RCT_EXPORT_METHOD(
     {
         [[RCCManager sharedIntance] unregisterController:vc];
         
+        dispatch_block_t completionBlock = ^{
+            resolve(nil);
+        };
+        
         [vc dismissViewControllerAnimated:![animationType isEqualToString:@"none"]
-                               completion:^(){ resolve(nil); }];
+                               completion:completionBlock];
     }
     else
     {

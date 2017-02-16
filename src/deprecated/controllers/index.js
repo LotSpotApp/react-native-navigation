@@ -131,7 +131,7 @@ var Controllers = {
 
   NavigationControllerIOS: function (id) {
     return {
-      push: function (params) {
+      push: async function (params) {
         var unsubscribes = [];
         if (params['style']) {
           params['style'] = Object.assign({}, params['style']);
@@ -148,15 +148,17 @@ var Controllers = {
           var unsubscribe = _processButtons(params['rightButtons']);
           unsubscribes.push(unsubscribe);
         }
-        RCCManager.NavigationControllerIOS(id, "push", params);
-        return function() {
-          for (var i = 0 ; i < unsubscribes.length ; i++) {
-            if (unsubscribes[i]) { unsubscribes[i](); }
-          }
-        };
+        return await RCCManager.NavigationControllerIOS(id, "push", params).then(() => {
+          return function() {
+            for (var i = 0 ; i < unsubscribes.length ; i++) {
+              if (unsubscribes[i]) { unsubscribes[i](); }
+            }
+          };
+        });
+
       },
-      pop: function (params) {
-        RCCManager.NavigationControllerIOS(id, "pop", params);
+      pop: async function (params) {
+        return await RCCManager.NavigationControllerIOS(id, "pop", params);
       },
       popToRoot: function (params) {
         RCCManager.NavigationControllerIOS(id, "popToRoot", params);
@@ -248,20 +250,20 @@ var Controllers = {
   },
 
   Modal: {
-    showLightBox: function(params) {
+    showLightBox: async function(params) {
       params['style'] = Object.assign({}, params['style']);
       _processProperties(params['style']);
-      RCCManager.modalShowLightBox(params);
+      return await RCCManager.modalShowLightBox(params);
     },
-    dismissLightBox: function() {
-      RCCManager.modalDismissLightBox();
+    dismissLightBox: async function() {
+      return await RCCManager.modalDismissLightBox();
     },
-    showController: function(appKey, animationType = 'slide-up', passProps = {}) {
+    showController: async function(appKey, animationType = 'slide-up', passProps = {}) {
       var controller = _controllerRegistry[appKey];
       if (controller === undefined) return;
       var layout = controller.render();
       _validateDrawerProps(layout);
-      RCCManager.showController(layout, animationType, passProps);
+      return await RCCManager.showController(layout, animationType, passProps);
     },
     dismissController: async function(animationType = 'slide-down') {
       return await RCCManager.dismissController(animationType);

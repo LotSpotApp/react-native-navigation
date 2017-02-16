@@ -231,7 +231,7 @@ function navigatorPush(navigator, params) {
 
   savePassProps(params);
 
-  Controllers.NavigationControllerIOS(navigator.navigatorID).push({
+  return Controllers.NavigationControllerIOS(navigator.navigatorID).push({
     title: params.title,
     subtitle: params.subtitle,
     titleImage: params.titleImage,
@@ -247,7 +247,7 @@ function navigatorPush(navigator, params) {
 }
 
 function navigatorPop(navigator, params) {
-  Controllers.NavigationControllerIOS(navigator.navigatorID).pop({
+  return Controllers.NavigationControllerIOS(navigator.navigatorID).pop({
     animated: params.animated
   });
 }
@@ -444,7 +444,7 @@ function showModal(params) {
   savePassProps(params);
 
   ControllerRegistry.registerController(controllerID, () => Controller);
-  Modal.showController(controllerID, params.animationType);
+  return Modal.showController(controllerID, params.animationType);
 }
 
 async function dismissModal(params) {
@@ -483,7 +483,7 @@ function showLightBox(params) {
 
   savePassProps(params);
 
-  Modal.showLightBox({
+  return Modal.showLightBox({
     component: params.screen,
     passProps: passProps,
     style: params.style
@@ -491,7 +491,7 @@ function showLightBox(params) {
 }
 
 function dismissLightBox(params) {
-  Modal.dismissLightBox();
+  return Modal.dismissLightBox();
 }
 
 function showInAppNotification(params) {
@@ -520,7 +520,7 @@ function showInAppNotification(params) {
     navigatorEventID,
     navigatorID
   };
-  
+
   savePassProps(params);
 
   let args = {
