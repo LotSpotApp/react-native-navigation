@@ -162,7 +162,7 @@ const NSInteger kLightBoxTag = 0x101010;
      }];
 }
 
--(void)dismissAnimated:(RCTPromiseResolveBlock)resolve
+-(void)dismissAnimated:(void (^)())resolve
 {
     BOOL hasOverlayViews = (self.visualEffectView != nil || self.overlayColorView != nil);
     
@@ -227,7 +227,7 @@ const NSInteger kLightBoxTag = 0x101010;
     [lightBox showAnimated:resolve];
 }
 
-+(void)dismiss:(RCTPromiseResolveBlock)resolve
++(void)dismiss:(void (^)())resolve
 {
     UIWindow *window = [RCCLightBox getWindow];
     RCCLightBoxView *lightBox = [window viewWithTag:kLightBoxTag];

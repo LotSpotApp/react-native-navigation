@@ -3,5 +3,5 @@
 
 @interface RCCLightBox : NSObject
 +(void)showWithParams:(NSDictionary*)params resolver:(RCTPromiseResolveBlock)resolve;
-+(void)dismiss:(RCTPromiseResolveBlock)resolve;
++(void)dismiss:(void (^)())resolve;
 @end

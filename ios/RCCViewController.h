@@ -16,6 +16,7 @@ extern NSString* const RCCViewControllerCancelReactTouchesNotification;
 - (void)setStyleOnInit;
 - (void)updateStyle;
 - (void)setNavBarVisibilityChange:(BOOL)animated;
++ (void)sendScreenPoppedEvent:(UIViewController*)viewController;
 
 @end
 

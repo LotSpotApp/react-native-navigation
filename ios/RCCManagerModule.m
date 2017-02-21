@@ -312,7 +312,12 @@ RCT_EXPORT_METHOD(
 RCT_EXPORT_METHOD(
                   modalDismissLightBox:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [RCCLightBox dismiss:resolve];
+    UIViewController* vc = [RCCManagerModule lastModalPresenterViewController];
+    
+    [RCCLightBox dismiss:^(){
+        [RCCViewController sendScreenPoppedEvent:vc];
+        resolve(nil);
+    }];
 }
 
 RCT_EXPORT_METHOD(
@@ -364,6 +369,7 @@ RCT_EXPORT_METHOD(
         
         dispatch_block_t completionBlock = ^{
             resolve(nil);
+            [RCCViewController sendScreenPoppedEvent:vc];
         };
         
         [vc dismissViewControllerAnimated:![animationType isEqualToString:@"none"]

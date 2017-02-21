@@ -9,6 +9,8 @@
 #import "RCCExternalViewControllerProtocol.h"
 #import "RCTHelpers.h"
 #import "RCCTitleViewHelper.h"
+#import "RCTEventDispatcher.h"
+#import <objc/runtime.h>
 
 NSString* const RCCViewControllerCancelReactTouchesNotification = @"RCCViewControllerCancelReactTouchesNotification";
 
@@ -599,6 +601,43 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     
     return interactionName;
 }
+
+
+-(void) didMoveToParentViewController:(UIViewController *)parent{
+
+  [super didMoveToParentViewController:parent];
+  
+  if (parent == nil){
+    NSLog(@"popped");
+    [RCCViewController sendScreenPoppedEvent:self];
+  }
+}
+
+
++(void)sendScreenPoppedEvent:(UIViewController*)viewController {
+  if ([viewController.view isKindOfClass:[RCTRootView class]]){
+    RCTRootView *rootView = (RCTRootView *)viewController.view;
+    
+    if (rootView.appProperties && rootView.appProperties[@"navigatorEventID"]) {
+      NSString *navigatorID = rootView.appProperties[@"navigatorID"];
+      NSString *screenInstanceID = rootView.appProperties[@"screenInstanceID"];
+      
+      [[[RCCManager sharedInstance] getBridge].eventDispatcher sendAppEventWithName:rootView.appProperties[@"navigatorEventID"] body:@
+       {
+         @"id": @"screenPopped",
+         @"navigatorID": navigatorID,
+         @"screenInstanceID": screenInstanceID
+       }];
+    }
+  }
+  
+  if ([viewController isKindOfClass:[UINavigationController class]]) {
+    UINavigationController *navigationController = (UINavigationController*)viewController;
+    UIViewController *topViewController = [navigationController topViewController];
+    [RCCViewController sendScreenPoppedEvent:topViewController];
+  }
+}
+
 
 
 @end
