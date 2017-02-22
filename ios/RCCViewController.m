@@ -223,9 +223,6 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
 
     NSMutableDictionary *titleTextAttributes = [RCTHelpers textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarText" baseFont:[UIFont boldSystemFontOfSize:17]];
     [self.navigationController.navigationBar setTitleTextAttributes:titleTextAttributes];
-    
-    // Do not attempt to modify the button's color (it has been previously set)
-    [navButtonTextAttributes removeObjectForKey:@"NSColor"];
 
     if (self.navigationItem.titleView && [self.navigationItem.titleView isKindOfClass:[RCCTitleView class]]) {
         
@@ -236,6 +233,9 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
 
     NSMutableDictionary *navButtonTextAttributes = [RCTHelpers textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarButton"];
 
+    // Do not attempt to modify the button's color (it has been previously set)
+    [navButtonTextAttributes removeObjectForKey:@"NSColor"];
+    
     if (navButtonTextAttributes.allKeys.count > 0) {
         
         for (UIBarButtonItem *item in viewController.navigationItem.leftBarButtonItems) {
