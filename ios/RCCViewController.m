@@ -223,6 +223,9 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
 
     NSMutableDictionary *titleTextAttributes = [RCTHelpers textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarText" baseFont:[UIFont boldSystemFontOfSize:17]];
     [self.navigationController.navigationBar setTitleTextAttributes:titleTextAttributes];
+    
+    // Do not attempt to modify the button's color (it has been previously set)
+    [navButtonTextAttributes removeObjectForKey:@"NSColor"];
 
     if (self.navigationItem.titleView && [self.navigationItem.titleView isKindOfClass:[RCCTitleView class]]) {
         
