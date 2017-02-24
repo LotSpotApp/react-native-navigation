@@ -120,12 +120,12 @@ var Controllers = {
     registerController: function (appKey, getControllerFunc) {
       _controllerRegistry[appKey] = getControllerFunc();
     },
-    setRootController: function (appKey, animationType = 'none', passProps = {}) {
+    setRootController: async function (appKey, animationType = 'none', passProps = {}) {
       var controller = _controllerRegistry[appKey];
       if (controller === undefined) return;
       var layout = controller.render();
       _validateDrawerProps(layout);
-      RCCManager.setRootController(layout, animationType, passProps);
+      await RCCManager.setRootController(layout, animationType, passProps);
     }
   },
 

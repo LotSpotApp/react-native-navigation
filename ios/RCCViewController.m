@@ -233,6 +233,9 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
 
     NSMutableDictionary *navButtonTextAttributes = [RCTHelpers textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarButton"];
 
+    // Do not attempt to modify the button's color (it has been previously set)
+    [navButtonTextAttributes removeObjectForKey:@"NSColor"];
+    
     if (navButtonTextAttributes.allKeys.count > 0) {
         
         for (UIBarButtonItem *item in viewController.navigationItem.leftBarButtonItems) {
