@@ -20,7 +20,7 @@
   dispatch_async(queue, ^{
     [[[RCCManager sharedInstance].getBridge uiManager] configureNextLayoutAnimation:nil withCallback:^(NSArray* arr){} errorCallback:^(NSArray* arr){}];
   });
-  
+
   if (tabBarController.selectedIndex != [tabBarController.viewControllers indexOfObject:viewController]) {
     [RCCTabBarController sendScreenTabChangedEvent:viewController];
   }
@@ -119,20 +119,20 @@
     viewController.tabBarItem = [[UITabBarItem alloc] initWithTitle:title image:iconImage tag:0];
     viewController.tabBarItem.accessibilityIdentifier = tabItemLayout[@"props"][@"testID"];
     viewController.tabBarItem.selectedImage = iconImageSelected;
-    
+
     NSMutableDictionary *unselectedAttributes = [RCTHelpers textAttributesFromDictionary:tabsStyle withPrefix:@"tabBarText" baseFont:[UIFont systemFontOfSize:10]];
     if (!unselectedAttributes[NSForegroundColorAttributeName] && buttonColor) {
       unselectedAttributes[NSForegroundColorAttributeName] = buttonColor;
     }
-    
+
     [viewController.tabBarItem setTitleTextAttributes:unselectedAttributes forState:UIControlStateNormal]
     ;
-    
+
     NSMutableDictionary *selectedAttributes = [RCTHelpers textAttributesFromDictionary:tabsStyle withPrefix:@"tabBarSelectedText" baseFont:[UIFont systemFontOfSize:10]];
     if (!selectedAttributes[NSForegroundColorAttributeName] && selectedButtonColor) {
       selectedAttributes[NSForegroundColorAttributeName] = selectedButtonColor;
     }
-    
+
     [viewController.tabBarItem setTitleTextAttributes:selectedAttributes forState:UIControlStateSelected];
     // create badge
     NSObject *badge = tabItemLayout[@"props"][@"badge"];
@@ -247,25 +247,33 @@
 +(void)sendScreenTabChangedEvent:(UIViewController*)viewController {
   if ([viewController.view isKindOfClass:[RCTRootView class]]){
     RCTRootView *rootView = (RCTRootView *)viewController.view;
-    
+
     if (rootView.appProperties && rootView.appProperties[@"navigatorEventID"]) {
       NSString *navigatorID = rootView.appProperties[@"navigatorID"];
       NSString *screenInstanceID = rootView.appProperties[@"screenInstanceID"];
-      
+
       [[[RCCManager sharedInstance] getBridge].eventDispatcher sendAppEventWithName:rootView.appProperties[@"navigatorEventID"] body:@
        {
-         @"id": @"bottomTabSelected",
+         @"id": @"screenPopped",
          @"navigatorID": navigatorID,
          @"screenInstanceID": screenInstanceID
        }];
     }
-  }
-  
-  if ([viewController isKindOfClass:[UINavigationController class]]) {
+  } else if ([viewController isKindOfClass:[RCCTabBarController class]]){
+    RCTRootView*rootView = [[(RCCTabBarController*)viewController viewControllers]objectAtIndex:[(RCCTabBarController*)viewController selectedIndex]];
+
+    if ([rootView isKindOfClass:[UINavigationController class]]) {
+      UINavigationController *navigationController = (UINavigationController*)rootView;
+      UIViewController *topViewController = [navigationController topViewController];
+      [RCCViewController sendScreenPoppedEvent:topViewController];
+    } else{
+      [RCCViewController sendScreenPoppedEvent:rootView];
+    }
+  } else if ([viewController isKindOfClass:[UINavigationController class]]) {
     UINavigationController *navigationController = (UINavigationController*)viewController;
     UIViewController *topViewController = [navigationController topViewController];
-    [RCCTabBarController sendScreenTabChangedEvent:topViewController];
-  }
+    [RCCViewController sendScreenPoppedEvent:topViewController];
+  } else{}
 }
 
 
