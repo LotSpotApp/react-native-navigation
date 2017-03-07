@@ -254,26 +254,18 @@
 
       [[[RCCManager sharedInstance] getBridge].eventDispatcher sendAppEventWithName:rootView.appProperties[@"navigatorEventID"] body:@
        {
-         @"id": @"screenPopped",
+         @"id": @"bottomTabSelected",
          @"navigatorID": navigatorID,
          @"screenInstanceID": screenInstanceID
        }];
     }
-  } else if ([viewController isKindOfClass:[RCCTabBarController class]]){
-    RCTRootView*rootView = [[(RCCTabBarController*)viewController viewControllers]objectAtIndex:[(RCCTabBarController*)viewController selectedIndex]];
+  }
 
-    if ([rootView isKindOfClass:[UINavigationController class]]) {
-      UINavigationController *navigationController = (UINavigationController*)rootView;
-      UIViewController *topViewController = [navigationController topViewController];
-      [RCCViewController sendScreenPoppedEvent:topViewController];
-    } else{
-      [RCCViewController sendScreenPoppedEvent:rootView];
-    }
-  } else if ([viewController isKindOfClass:[UINavigationController class]]) {
+  if ([viewController isKindOfClass:[UINavigationController class]]) {
     UINavigationController *navigationController = (UINavigationController*)viewController;
     UIViewController *topViewController = [navigationController topViewController];
-    [RCCViewController sendScreenPoppedEvent:topViewController];
-  } else{}
+    [RCCTabBarController sendScreenTabChangedEvent:topViewController];
+  }
 }
 
 
