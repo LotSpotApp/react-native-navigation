@@ -1,4 +1,4 @@
-#import "RCTBridge.h"
+#import <React/RCTBridge.h>
 #import <UIKit/UIKit.h>
 
 @interface RCCLightBox : NSObject
