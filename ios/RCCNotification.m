@@ -1,7 +1,7 @@
 
 #import "RCCNotification.h"
-#import "RCTRootView.h"
-#import "RCTHelpers.h"
+#import <React/RCTRootView.h>
+#import <React/RCTHelpers.h>
 
 @interface NotificationView : UIView
 @property (nonatomic, strong) RCTRootView *reactView;
