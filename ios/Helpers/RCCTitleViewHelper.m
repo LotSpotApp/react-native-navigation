@@ -8,7 +8,7 @@
 
 #import "RCCTitleViewHelper.h"
 #import <React/RCTConvert.h>
-#import <React/RCTHelpers.h>
+#import "RCTHelpers.h"
 
 @implementation RCCTitleView
 

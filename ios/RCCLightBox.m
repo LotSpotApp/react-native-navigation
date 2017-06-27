@@ -3,7 +3,7 @@
 #import <React/RCTRootView.h>
 #import <React/RCTRootViewDelegate.h>
 #import <React/RCTConvert.h>
-#import <React/RCTHelpers.h>
+#import "RCTHelpers.h"
 #import <objc/runtime.h>
 
 const NSInteger kLightBoxTag = 0x101010;

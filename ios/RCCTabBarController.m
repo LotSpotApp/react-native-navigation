@@ -2,7 +2,7 @@
 #import "RCCViewController.h"
 #import <React/RCTConvert.h>
 #import "RCCManager.h"
-#import <React/RCTHelpers.h>
+#import "RCTHelpers.h"
 #import <React/RCTUIManager.h>
 
 @interface RCTUIManager ()

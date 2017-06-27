@@ -7,7 +7,7 @@
 #import "RCCManager.h"
 #import <React/RCTConvert.h>
 #import "RCCExternalViewControllerProtocol.h"
-#import <React/RCTHelpers.h>
+#import "RCTHelpers.h"
 #import "RCCTitleViewHelper.h"
 #import <React/RCTEventDispatcher.h>
 #import <objc/runtime.h>

@@ -6,7 +6,7 @@
 //  Copyright © 2016 artal. All rights reserved.
 //
 
-#import <React/RCTHelpers.h>
+#import "RCTHelpers.h"
 #import <React/RCTView.h>
 #import <React/RCTScrollView.h>
 #import <React/RCTFont.h>
