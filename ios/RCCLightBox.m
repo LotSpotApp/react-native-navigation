@@ -220,7 +220,7 @@ const NSInteger kLightBoxTag = 0x101010;
 
 @implementation RCCLightBox
 
-+(void)showWithParams:(NSDictionary*)params
++(void)showWithParams:(NSDictionary*)params resolver:(RCTPromiseResolveBlock)resolve
 {
     UIViewController *viewController = RCTPresentedViewController();
     if ([viewController.view viewWithTag:kLightBoxTag] != nil)
@@ -231,7 +231,7 @@ const NSInteger kLightBoxTag = 0x101010;
     RCCLightBoxView *lightBox = [[RCCLightBoxView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) params:params];
     lightBox.tag = kLightBoxTag;
     [viewController.view addSubview:lightBox];
-    [lightBox showAnimated];
+    [lightBox showAnimated: resolve];
 }
 
 +(void)dismiss:(void (^)())resolve
