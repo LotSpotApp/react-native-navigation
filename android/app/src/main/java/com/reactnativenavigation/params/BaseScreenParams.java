@@ -20,6 +20,7 @@ public class BaseScreenParams {
     public String fragmentCreatorClassName;
     public Bundle fragmentCreatorPassProps;
     public boolean animateScreenTransitions;
+    public String animationType;
 
     public boolean isFragmentScreen() {
         return fragmentCreatorClassName != null;
@@ -43,5 +44,9 @@ public class BaseScreenParams {
 
     public FabParams getFab() {
         return fabParams;
+    }
+
+    public void setFab(FabParams params) {
+        fabParams = params;
     }
 }

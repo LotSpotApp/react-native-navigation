@@ -23,6 +23,7 @@
 @property (nonatomic, strong) NSString *title;
 @property (nonatomic, strong) NSString *subtitle;
 @property (nonatomic, strong) id titleImageData;
+@property (nonatomic) BOOL isSetSubtitle;
 
 @property (nonatomic, strong) RCCTitleView *titleView;
 
@@ -35,16 +36,30 @@
 navigationController:(UINavigationController*)navigationController
                title:(NSString*)title subtitle:(NSString*)subtitle
       titleImageData:(id)titleImageData
+       isSetSubtitle:(BOOL)isSetSubtitle
+
 {
     self = [super init];
     if (self) {
         self.viewController = viewController;
         self.navigationController = navigationController;
-        self.title = title;
-        self.subtitle = subtitle;
+        if(isSetSubtitle){
+            self.title = viewController.navigationItem.title;
+        } else {
+            self.title = [RCCTitleViewHelper validateString:title];
+        }
+        self.subtitle = [RCCTitleViewHelper validateString:subtitle];
         self.titleImageData = titleImageData;
     }
     return self;
+}
+
++(NSString*)validateString:(NSString*)string {
+    if ([string isEqual:[NSNull null]]) {
+        return nil;
+    }
+    
+    return string;
 }
 
 -(void)setup:(NSDictionary*)style
@@ -61,7 +76,7 @@ navigationController:(UINavigationController*)navigationController
     self.titleView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
     self.titleView.clipsToBounds = YES;
     
-    self.viewController.title = self.title;
+    self.viewController.navigationItem.title = self.title;
     
     if ([self isTitleOnly]) {
         self.viewController.navigationItem.titleView = nil;
@@ -148,7 +163,8 @@ navigationController:(UINavigationController*)navigationController
     CGRect labelframe = subtitleLabel.frame;
     labelframe.size = labelSize;
     subtitleLabel.frame = labelframe;
-    
+    [subtitleLabel sizeToFit];
+
     [self.titleView addSubview:subtitleLabel];
     
     return subtitleLabel;
