@@ -253,7 +253,7 @@ function navigatorPush(navigator, params) {
 
 function navigatorPop(navigator, params) {
   return Controllers.NavigationControllerIOS(navigator.navigatorID).pop({
-    animated: params.animated
+    animated: params.animated,
     animationType: params.animationType
   });
 }
