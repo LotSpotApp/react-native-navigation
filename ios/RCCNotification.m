@@ -20,26 +20,27 @@
     {
         self.params = params;
         self.yellowBoxRemoved = NO;
-        
+
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        
+
         self.reactView = [[RCTRootView alloc] initWithBridge:[[RCCManager sharedInstance] getBridge] moduleName:params[@"component"] initialProperties:params[@"passProps"]];
         self.reactView.backgroundColor = [UIColor clearColor];
         self.reactView.sizeFlexibility = RCTRootViewSizeFlexibilityWidthAndHeight;
         self.reactView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
         [self addSubview:self.reactView];
-        
+
         [self.reactView.contentView.layer addObserver:self forKeyPath:@"frame" options:0 context:nil];
         [self.reactView.contentView.layer addObserver:self forKeyPath:@"bounds" options:0 context:NULL];
-        
-        
+
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onRNReload) name:RCTJavaScriptWillStartLoadingNotification object:nil];
+
         if ([params[@"dismissWithSwipe"] boolValue])
         {
             UISwipeGestureRecognizer *swipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(performDismiss)];
             swipeGesture.direction = [self swipeDirection];
             [self addGestureRecognizer:swipeGesture];
         }
-        
+
         if (params[@"shadowRadius"] != nil && [params[@"shadowRadius"] floatValue] > 0)
         {
             self.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -47,7 +48,7 @@
             self.layer.shadowRadius = [params[@"shadowRadius"] floatValue];
             self.layer.shadowOpacity = 0.6;
         }
-        
+
         self.hidden = YES;
     }
     return self;
@@ -56,7 +57,7 @@
 -(void)layoutSubviews
 {
     [super layoutSubviews];
-    
+
     if(!self.yellowBoxRemoved)
     {
         self.yellowBoxRemoved = [RCTHelpers removeYellowBox:self.reactView];
@@ -66,7 +67,7 @@
 -(UISwipeGestureRecognizerDirection)swipeDirection
 {
     UISwipeGestureRecognizerDirection direction = UISwipeGestureRecognizerDirectionUp;
-    
+
     NSString *animationType = [self.params valueForKeyPath:@"animation.type"];
     if ([animationType isEqualToString:@"swing"] || [animationType isEqualToString:@"slide-down"])
         direction = UISwipeGestureRecognizerDirectionUp;
@@ -74,7 +75,7 @@
         direction = UISwipeGestureRecognizerDirectionRight;
     else if ([animationType isEqualToString:@"slide-right"])
         direction = UISwipeGestureRecognizerDirectionLeft;
-    
+
     return direction;
 }
 
@@ -118,22 +119,22 @@
     {
         return [UIColor clearColor];
     }
-    
+
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(1, 1), YES, 0);
     [self.reactView.contentView drawViewHierarchyInRect:CGRectMake(0, 0, 1, 1) afterScreenUpdates:YES];
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    
+
     CFDataRef pixelData = CGDataProviderCopyData(CGImageGetDataProvider(image.CGImage));
     const UInt8* data = CFDataGetBytePtr(pixelData);
     CFRelease(pixelData);
-    
+
     //after scale defaults to bgr
     CGFloat red = data[2] / 255.0f,
             green = data[1] / 255.0f,
             blue = data[0] / 255.0f,
             alpha = data[3] / 255.0f;
-    
+
     UIColor *color = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
     return color;
 }
@@ -144,24 +145,24 @@
     {
         return NO;
     }
-    
+
     NSString *animationType = [self.params valueForKeyPath:@"animation.type"];
     if (![animationType isEqualToString:@"slide-down"])
     {
         return NO;
     }
-    
+
     if (![self.params valueForKeyPath:@"animation.damping"])
     {
         return NO;
     }
-    
+
     CGFloat damping = [[self.params valueForKeyPath:@"animation.damping"] floatValue];
     if (damping >= 1)
     {
         return NO;
     }
-    
+
     return YES;
 }
 
@@ -177,7 +178,7 @@
         frameSize = ((CALayer*)object).frame.size;
     if ([object isKindOfClass:[UIView class]])
         frameSize = ((UIView*)object).frame.size;
-    
+
     if (!CGSizeEqualToSize(frameSize, self.reactView.frame.size))
     {
         BOOL isBottomPosition = [self isBottomPosition];
@@ -185,7 +186,7 @@
         self.frame = CGRectMake((self.superview.frame.size.width - frameSize.width) / 2.0, yPos, frameSize.width, frameSize.height);
         self.reactView.frame = CGRectMake(0, 0, frameSize.width, frameSize.height);
         self.reactView.contentView.frame = CGRectMake(0, 0, frameSize.width, frameSize.height);
-    
+
         //if necessary, add a view with the same color to cover the gap if there's a slide animation with spring
         if ([self shouldAddSlidingAnimGapView])
         {
@@ -194,16 +195,16 @@
                 self.slideAnimGapView = [[UIView alloc] initWithFrame:CGRectZero];
                 [self.reactView addSubview:self.slideAnimGapView];
             }
-            
+
             CGFloat yPos = isBottomPosition ? frameSize.height : -20;
             self.slideAnimGapView.frame = CGRectMake(0, yPos, self.superview.frame.size.width, 20);
-            
+
             dispatch_async(dispatch_get_main_queue(), ^
             {
                self.slideAnimGapView.backgroundColor = [self reactViewAvgColor];
             });
         }
-        
+
         if (self.params[@"shadowRadius"] != nil && [self.params[@"shadowRadius"] floatValue] > 0)
         {
             self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
@@ -221,7 +222,7 @@
     if (self.params[@"autoDismissTimerSec"])
     {
         [self killAutoDismissTimer];
-        
+
         CGFloat interval = [self.params[@"autoDismissTimerSec"] floatValue];
         interval = MAX(interval, 1);
         self.autoDismissTimer = [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(performDismiss) userInfo:nil repeats:NO];
@@ -245,7 +246,7 @@
                 anchorPoint = CGPointMake(0.5, 1);
                 yOffset = self.layer.frame.size.height / 2.0;
             }
-            
+
             self.layer.anchorPoint = anchorPoint;
             self.layer.frame = CGRectOffset(self.layer.frame, 0, yOffset);
         }
@@ -262,10 +263,10 @@
             transform = CGAffineTransformMakeTranslation(self.frame.size.width, 0);
         else if ([animationType isEqualToString:@"slide-right"])
             transform = CGAffineTransformMakeTranslation(-self.frame.size.width, 0);
-        
+
         self.transform = transform;
     }
-    
+
     if ( [[self.params valueForKeyPath:@"animation.fade"] boolValue])
     {
         self.alpha = 0;
@@ -277,12 +278,12 @@
 -(void)showAnimationEnded:(void (^)(void))completion
 {
     self.alpha = 1;
-    
+
     if (completion)
     {
         completion();
     }
-    
+
     [self startAutoDismissTimerIfNecessary];
 }
 
@@ -292,19 +293,19 @@
     {
         completion();
     }
-    
+
     [self removeFromSuperview];
 }
 
 -(void)performShowWithCompletion:(void (^)(void))completion
 {
     self.hidden = NO;
-    
+
     if ([[self.params valueForKeyPath:@"animation.animated"] boolValue])
     {
         CGFloat duration = [[self.params valueForKeyPath:@"animation.duration"] floatValue];
         CGFloat delay = [[self.params valueForKeyPath:@"animation.delay"] floatValue];
-        
+
         CGFloat damping = 1;
         if ([self.params valueForKeyPath:@"animation.damping"] != nil)
         {
@@ -312,9 +313,9 @@
             damping = MAX(damping, 0);
             damping = MIN(damping, 1);
         }
-        
+
         [self applyAnimations];
-        
+
         [UIView animateWithDuration:duration delay:delay usingSpringWithDamping:damping initialSpringVelocity:0 options:UIViewAnimationOptionCurveEaseOut animations:^()
          {
              self.alpha = 1;
@@ -352,7 +353,7 @@
 {
     [self killAutoDismissTimer];
     [self.reactView cancelTouches];
-    
+
     if ([[self.params valueForKeyPath:@"animation.animated"] boolValue])
     {
         CGFloat duration = [[self.params valueForKeyPath:@"animation.duration"] floatValue] * 0.75;
@@ -393,17 +394,17 @@ static NSMutableArray *gShownNotificationViews = nil;
 {
     if(gPendingNotifications == nil)
         gPendingNotifications = [NSMutableArray array];
-    
+
     if(gShownNotificationViews == nil)
         gShownNotificationViews = [NSMutableArray array];
-    
+
     if ([gShownNotificationViews count] > 0)
     {
         for (NotificationView *notificationView in gShownNotificationViews)
         {
             [notificationView killAutoDismissTimer];
         }
-        
+
         //limit the amount of consecutive notifications per second. If they arrive too fast, the last one will be remembered as pending
         if(CFAbsoluteTimeGetCurrent() - gLastShownTime < 1)
         {
@@ -415,9 +416,9 @@ static NSMutableArray *gShownNotificationViews = nil;
             return;
         }
     }
-    
+
     gLastShownTime = CFAbsoluteTimeGetCurrent();
-    
+
     UIWindow *window = [[RCCManager sharedInstance] getAppWindow];
     NotificationView *notificationView = [[NotificationView alloc] initWithParams:params];
     [window addSubview:notificationView];
@@ -446,7 +447,7 @@ static NSMutableArray *gShownNotificationViews = nil;
                  {
                      resolve(nil);
                  }
-                 
+
                  if ([gPendingNotifications count] > 0)
                  {
                      PendingNotification *pendingNotification = [gPendingNotifications lastObject];

@@ -201,7 +201,7 @@ public class SingleScreenLayout extends BaseLayout {
 
     @Override
     public void setFab(String screenInstanceId, String navigatorEventId, FabParams fabParams) {
-        stack.setFab(screenInstanceId, navigatorEventId, fabParams);
+        stack.setFab(screenInstanceId, fabParams);
     }
 
     @Override

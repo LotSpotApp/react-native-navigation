@@ -117,7 +117,7 @@ public class BottomTabsLayout extends BaseLayout implements AHBottomNavigation.O
 
     private void createSnackbarContainer() {
         snackbarAndFabContainer = new SnackbarAndFabContainer(getContext(), this);
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
         lp.addRule(ABOVE, bottomTabs.getId());
         getScreenStackParent().addView(snackbarAndFabContainer, lp);
     }
@@ -190,7 +190,7 @@ public class BottomTabsLayout extends BaseLayout implements AHBottomNavigation.O
     @Override
     public void setFab(String screenInstanceId, String navigatorEventId, FabParams fabParams) {
         for (int i = 0; i < bottomTabs.getItemsCount(); i++) {
-            screenStacks[i].setFab(screenInstanceId, navigatorEventId, fabParams);
+            screenStacks[i].setFab(screenInstanceId, fabParams);
         }
     }
 
@@ -345,20 +345,38 @@ public class BottomTabsLayout extends BaseLayout implements AHBottomNavigation.O
     @Override
     public boolean onTabSelected(int position, boolean wasSelected) {
         if (wasSelected) {
+            sendTabReselectedEventToJs();
             return false;
         }
-        
+
+        final int unselectedTabIndex = currentStackIndex;
         hideCurrentStack();
         showNewStack(position);
         EventBus.instance.post(new ScreenChangedEvent(getCurrentScreenStack().peek().getScreenParams()));
-        sendTabSelectedEventToJs();
+        sendTabSelectedEventToJs(position, unselectedTabIndex);
         return true;
     }
 
-    private void sendTabSelectedEventToJs() {
+    private void sendTabSelectedEventToJs(int selectedTabIndex, int unselectedTabIndex) {
+        String navigatorEventId = getCurrentScreenStack().peek().getNavigatorEventId();
+        WritableMap data = createTabSelectedEventData(selectedTabIndex, unselectedTabIndex);
+        NavigationApplication.instance.getEventEmitter().sendNavigatorEvent("bottomTabSelected", navigatorEventId, data);
+
+        data = createTabSelectedEventData(selectedTabIndex, unselectedTabIndex);
+        NavigationApplication.instance.getEventEmitter().sendNavigatorEvent("bottomTabSelected", data);
+    }
+
+    private WritableMap createTabSelectedEventData(int selectedTabIndex, int unselectedTabIndex) {
+        WritableMap data = Arguments.createMap();
+        data.putInt("selectedTabIndex", selectedTabIndex);
+        data.putInt("unselectedTabIndex", unselectedTabIndex);
+        return data;
+    }
+
+    private void sendTabReselectedEventToJs() {
         WritableMap data = Arguments.createMap();
         String navigatorEventId = getCurrentScreenStack().peek().getNavigatorEventId();
-        NavigationApplication.instance.getEventEmitter().sendNavigatorEvent("bottomTabSelected", navigatorEventId, data);
+        NavigationApplication.instance.getEventEmitter().sendNavigatorEvent("bottomTabReselected", navigatorEventId, data);
     }
 
     private void showNewStack(int position) {
