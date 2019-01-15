@@ -5,7 +5,7 @@ import android.app.Activity;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.JavaJSExecutor;
 import com.facebook.react.devsupport.ReactInstanceManagerDevHelper;
-import com.facebook.react.devsupport.ReactInstanceDevCommandsHandler;
+// import com.facebook.react.devsupport.ReactInstanceDevCommandsHandler;
 import com.reactnativenavigation.utils.ReflectionUtils;
 
 class JsDevReloadListenerReplacer {
